@@ -125,7 +125,7 @@ export default function PetDetailPage() {
         <p className="pet-detail__subtitle">
           {pet.species.name}{pet.breed ? ` · ${pet.breed}` : ''} · {sizeLabel(pet.size)} · {sexLabel(pet.sex)}
         </p>
-        <p className="pet-detail__subtitle">{formatAge(pet.ageYears, pet.ageMonths)}</p>
+        <p className="pet-detail__subtitle">{formatAge(pet.ageYears, pet.ageMonths, pet.ageDays)}</p>
 
         <div className="pet-detail__badges">
           {pet.isVaccinated && <span className="badge badge-primary">Vacunado</span>}
@@ -135,7 +135,9 @@ export default function PetDetailPage() {
 
         <p className="pet-detail__description">{pet.description}</p>
 
-        <p className="pet-detail__owner">Publicado por <strong>{pet.owner.firstName} {pet.owner.lastName}</strong></p>
+        <p className="pet-detail__owner">
+          Publicado por <Link to={`/usuarios/${pet.owner.id}`} className="pet-detail__owner-link"><strong>{pet.owner.firstName} {pet.owner.lastName}</strong></Link>
+        </p>
 
         {(pet.contactWhatsapp || pet.contactEmail) && (
           <div className="pet-detail__contact-buttons">
@@ -151,7 +153,8 @@ export default function PetDetailPage() {
             {pet.contactEmail && (
               <a
                 className="btn btn-outline"
-                href={`mailto:${pet.contactEmail}?subject=${encodeURIComponent(`Publicación de ${pet.name}`)}&body=${encodeURIComponent(`Hola! Te escribo por la publicación de ${pet.name}`)}`}
+                target="_blank" rel="noreferrer"
+                href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(pet.contactEmail)}&su=${encodeURIComponent(`Publicación de ${pet.name}`)}&body=${encodeURIComponent(`Hola! Te escribo por la publicación de ${pet.name}`)}`}
               >
                 <MailIcon size={18} /> Email
               </a>

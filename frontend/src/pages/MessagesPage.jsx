@@ -3,8 +3,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { conversationsApi } from '../api/conversations';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
+import { useNotifications } from '../context/NotificationsContext';
 import FullPageSpinner from '../components/ui/FullPageSpinner';
-import { ArchiveIcon, ArrowLeftIcon, SendIcon, TrashIcon, UserIcon } from '../components/icons/Icons';
+import Avatar from '../components/Avatar';
+import { ArchiveIcon, ArrowLeftIcon, SendIcon, TrashIcon } from '../components/icons/Icons';
 import { timeAgo } from '../utils/format';
 import './messages.css';
 
@@ -13,6 +15,7 @@ export default function MessagesPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { socket } = useSocket();
+  const { refresh: refreshNotifications } = useNotifications();
 
   const [groups, setGroups] = useState(null);
   const [expandedPerson, setExpandedPerson] = useState(null);
@@ -34,7 +37,9 @@ export default function MessagesPage() {
       setMessages(d.messages);
       setLoadingThread(false);
       loadConversations();
+      refreshNotifications();
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId]);
 
   useEffect(() => {
@@ -46,6 +51,9 @@ export default function MessagesPage() {
     const handler = ({ conversationId: incomingId, message }) => {
       if (String(incomingId) === String(conversationId)) {
         setMessages((list) => [...list, message]);
+        // El chat ya está abierto: le avisamos al backend que este mensaje se leyó
+        // al toque, así la campanita no se queda con un número colgado.
+        conversationsApi.messages(conversationId).then(() => refreshNotifications());
       }
       loadConversations();
     };
@@ -113,7 +121,7 @@ export default function MessagesPage() {
                     className="conversation-list__person"
                     onClick={() => single ? navigate(`/mensajes/${g.chats[0].conversationId}`) : setExpandedPerson(isExpanded ? null : g.counterpart.id)}
                   >
-                    <span className="avatar"><UserIcon size={16} /></span>
+                    <Avatar url={g.counterpart.profilePhotoUrl} />
                     <span className="conversation-list__person-info">
                       <strong>{g.counterpart.firstName} {g.counterpart.lastName}</strong>
                       {single && <span className="conversation-list__preview">{g.chats[0].lastMessagePreview}</span>}
@@ -155,6 +163,7 @@ export default function MessagesPage() {
                 <button className="btn-icon btn-ghost mobile-back" onClick={() => navigate('/mensajes')} aria-label="Volver">
                   <ArrowLeftIcon size={18} />
                 </button>
+                <Avatar url={activeChat.counterpart.profilePhotoUrl} size={30} />
                 <strong>{activeChat.counterpart.firstName} {activeChat.counterpart.lastName}</strong>
                 <span className="field-hint"> · sobre {activeChat.petName}</span>
               </div>

@@ -2,6 +2,7 @@ const ApiError = require('../utils/ApiError');
 const db = require('../db/knex');
 const conversationRepository = require('../models/conversationRepository');
 const messageRepository = require('../models/messageRepository');
+const notificationRepository = require('../models/notificationRepository');
 const chatService = require('../services/chatService');
 
 async function start(req, res) {
@@ -69,6 +70,7 @@ async function getMessages(req, res) {
 
   if (!beforeId) {
     await messageRepository.markAllRead(convo.id, req.user.id);
+    await notificationRepository.markReadByConversation(req.user.id, convo.id);
   }
 
   res.json({ messages: messages.reverse().map(chatService.serializeMessage) });

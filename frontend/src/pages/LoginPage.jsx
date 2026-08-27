@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Field from '../components/ui/Field';
-import { PawIcon } from '../components/icons/Icons';
+import logo from '../assets/logo-header.png';
 import './auth.css';
 
 export default function LoginPage() {
@@ -30,7 +30,7 @@ export default function LoginPage() {
   return (
     <div className="auth-page">
       <div className="card auth-card">
-        <div className="auth-card__brand"><PawIcon /> PataHogar</div>
+        <div className="auth-card__brand"><img src={logo} alt="" className="auth-card__logo" /> PataHogar</div>
         <h1>Ingresá a tu cuenta</h1>
         <p className="auth-card__subtitle">Encontrá o publicá mascotas en adopción.</p>
 

@@ -6,6 +6,7 @@ import { catalogApi } from '../api/catalog';
 import { useAuth } from '../context/AuthContext';
 import PetCard from '../components/PetCard';
 import FilterSidebar from '../components/FilterSidebar';
+import CityAutocomplete from '../components/CityAutocomplete';
 import { PawIcon, PlusIcon, SearchIcon } from '../components/icons/Icons';
 import { speciesIcon } from '../utils/speciesIcons';
 import './home.css';
@@ -13,13 +14,12 @@ import './home.css';
 const EMPTY_FILTERS = {
   q: '', speciesId: '', sex: '', size: '', minAgeYears: '', maxAgeYears: '',
   isVaccinated: false, isNeutered: false, isDewormed: false,
-  cityId: '', maxDistanceKm: '100', page: 1,
+  city: null, maxDistanceKm: '100', page: 1,
 };
 
 export default function HomePage() {
   const { user, isAuthenticated } = useAuth();
   const [species, setSpecies] = useState([]);
-  const [cities, setCities] = useState([]);
   const [stats, setStats] = useState(null);
   const [filters, setFilters] = useState(EMPTY_FILTERS);
   const [searchDraft, setSearchDraft] = useState('');
@@ -30,15 +30,22 @@ export default function HomePage() {
 
   useEffect(() => {
     catalogApi.species().then((d) => setSpecies(d.species)).catch(() => {});
-    catalogApi.cities().then((d) => setCities(d.cities)).catch(() => {});
     petsApi.stats().then(setStats).catch(() => {});
   }, []);
 
   // Por defecto, mostramos mascotas cerca de la ciudad del usuario logueado.
   useEffect(() => {
-    if (isAuthenticated && user?.cityId && !cityDefaultApplied.current) {
+    if (isAuthenticated && user?.cityName && !cityDefaultApplied.current) {
       cityDefaultApplied.current = true;
-      setFilters((f) => ({ ...f, cityId: String(user.cityId) }));
+      catalogApi.cities().then((d) => {
+        const match = d.cities.find((c) => c.id === user.cityId);
+        if (match) {
+          setFilters((f) => ({
+            ...f,
+            city: { georefId: null, name: match.name, province: match.province, latitude: match.latitude, longitude: match.longitude },
+          }));
+        }
+      }).catch(() => {});
     }
   }, [isAuthenticated, user]);
 
@@ -56,12 +63,11 @@ export default function HomePage() {
     }, 300);
     return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters, cities]);
+  }, [filters]);
 
   async function runSearch() {
     setLoading(true);
     try {
-      const city = cities.find((c) => String(c.id) === String(filters.cityId));
       const params = {
         q: filters.q || undefined,
         speciesId: filters.speciesId || undefined,
@@ -72,9 +78,9 @@ export default function HomePage() {
         isVaccinated: filters.isVaccinated || undefined,
         isNeutered: filters.isNeutered || undefined,
         isDewormed: filters.isDewormed || undefined,
-        lat: city?.latitude,
-        lng: city?.longitude,
-        maxDistanceKm: city ? filters.maxDistanceKm : undefined,
+        lat: filters.city?.latitude,
+        lng: filters.city?.longitude,
+        maxDistanceKm: filters.city ? filters.maxDistanceKm : undefined,
         page: filters.page,
         pageSize: 24,
       };
@@ -109,8 +115,6 @@ export default function HomePage() {
     setFilters((f) => ({ ...f, q: searchDraft, page: 1 }));
   }
 
-  const cityLabel = cities.find((c) => String(c.id) === String(filters.cityId))?.name;
-
   return (
     <div className="home">
       <section className="hero">
@@ -126,13 +130,13 @@ export default function HomePage() {
                 value={searchDraft}
                 onChange={(e) => setSearchDraft(e.target.value)}
               />
-              <select
-                value={filters.cityId}
-                onChange={(e) => setFilters((f) => ({ ...f, cityId: e.target.value, page: 1 }))}
-              >
-                <option value="">Todas las ciudades</option>
-                {cities.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
+              <div className="hero__searchbar-city">
+                <CityAutocomplete
+                  value={filters.city}
+                  onChange={(city) => setFilters((f) => ({ ...f, city, page: 1 }))}
+                  placeholder="Todas las ciudades"
+                />
+              </div>
               <button type="submit" className="btn btn-accent">Buscar</button>
             </form>
           </div>
@@ -191,9 +195,8 @@ export default function HomePage() {
         <div className="home-layout">
           <FilterSidebar
             filters={filters}
-            cities={cities}
             onChange={(f) => setFilters({ ...f, page: 1 })}
-            onReset={() => setFilters({ ...EMPTY_FILTERS, cityId: filters.cityId, speciesId: filters.speciesId })}
+            onReset={() => setFilters({ ...EMPTY_FILTERS, city: filters.city, speciesId: filters.speciesId })}
           />
 
           <div>
@@ -201,7 +204,7 @@ export default function HomePage() {
               <h2>Mascotas en adopción</h2>
               {!loading && (
                 <span className="home-results-count">
-                  {result.pagination.total} resultados{cityLabel ? ` · ${cityLabel} y alrededores` : ''}
+                  {result.pagination.total} resultados{filters.city ? ` · ${filters.city.name} y alrededores` : ''}
                 </span>
               )}
             </div>

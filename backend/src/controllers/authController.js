@@ -32,8 +32,11 @@ function toPublicUser(user) {
     phone: user.phone,
     profilePhotoUrl: user.profile_photo_url,
     cityId: user.city_id,
+    cityName: user.city_name,
+    cityProvince: user.city_province,
     role: user.role,
     isVerified: user.is_verified,
+    createdAt: user.created_at,
   };
 }
 
@@ -58,12 +61,23 @@ async function createAndSendVerificationCode(user, type) {
 }
 
 async function register(req, res) {
-  const { firstName, lastName, email, password, phone, cityId, verifiedLat, verifiedLng } = req.body;
+  const {
+    firstName, lastName, email, password, phone, verifiedLat, verifiedLng,
+    cityGeorefId, cityName, cityProvince, cityLat, cityLng,
+  } = req.body;
 
   const existing = await userRepository.findByEmail(email);
   if (existing) {
     if (existing.is_verified) {
       throw new ApiError(409, 'Ya existe una cuenta registrada con ese email.');
+    }
+    if (env.skipEmailVerification) {
+      await userRepository.update(existing.id, { is_verified: true });
+      return res.status(201).json({
+        message: 'Cuenta activada. Ya podés iniciar sesión.',
+        email: existing.email,
+        requiresVerification: false,
+      });
     }
     // La cuenta existe pero nunca se verificó (por ejemplo, el email de verificación
     // falló la primera vez). En vez de dejar al usuario trabado con un 409, le
@@ -72,13 +86,17 @@ async function register(req, res) {
     return res.status(201).json({
       message: 'Ya tenías una cuenta pendiente de verificación. Te enviamos un código nuevo.',
       email: existing.email,
+      requiresVerification: true,
     });
   }
 
-  const city = await cityRepository.findById(cityId);
-  if (!city) {
-    throw new ApiError(422, 'La ciudad seleccionada no es válida.');
-  }
+  const city = await cityRepository.findOrCreateByGeoref({
+    georefId: cityGeorefId,
+    name: cityName,
+    province: cityProvince,
+    latitude: cityLat,
+    longitude: cityLng,
+  });
 
   const location = locationService.resolveUserLocation(city, verifiedLat, verifiedLng);
   const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
@@ -89,17 +107,28 @@ async function register(req, res) {
     email,
     password_hash: passwordHash,
     phone,
-    city_id: cityId,
+    city_id: city.id,
     verified_lat: location.verifiedLat,
     verified_lng: location.verifiedLng,
     location_source: location.locationSource,
+    // Modo temporal sin verificación por email: la cuenta queda operativa al instante.
+    is_verified: env.skipEmailVerification,
   });
+
+  if (env.skipEmailVerification) {
+    return res.status(201).json({
+      message: 'Cuenta creada. Ya podés iniciar sesión (verificación por email desactivada por ahora).',
+      email: user.email,
+      requiresVerification: false,
+    });
+  }
 
   await createAndSendVerificationCode(user, 'email_verification');
 
   res.status(201).json({
     message: 'Cuenta creada. Te enviamos un código de verificación a tu email.',
     email: user.email,
+    requiresVerification: true,
   });
 }
 
@@ -168,7 +197,8 @@ async function login(req, res) {
   const accessToken = await issueSession(res, user, Boolean(rememberMe), req);
   await userRepository.update(user.id, { last_login_at: new Date() });
 
-  res.json({ accessToken, user: toPublicUser(user) });
+  const publicUser = await userRepository.findPublicById(user.id);
+  res.json({ accessToken, user: toPublicUser(publicUser) });
 }
 
 async function refresh(req, res) {
@@ -192,7 +222,8 @@ async function refresh(req, res) {
   const rememberMe = record.expires_at - record.created_at > 2 * 24 * 60 * 60 * 1000;
   const accessToken = await issueSession(res, user, rememberMe, req);
 
-  res.json({ accessToken, user: toPublicUser(user) });
+  const publicUser = await userRepository.findPublicById(user.id);
+  res.json({ accessToken, user: toPublicUser(publicUser) });
 }
 
 async function logout(req, res) {

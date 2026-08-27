@@ -6,6 +6,7 @@ const notificationService = require('../services/notificationService');
 const adminActionRepository = require('../models/adminActionRepository');
 const locationService = require('../services/locationService');
 const imageService = require('../services/imageService');
+const { computeAgeFromBirthDate } = require('../utils/age');
 
 const MAX_PHOTOS = 10;
 
@@ -13,15 +14,52 @@ function toBool(v) {
   return v === true || v === 'true' || v === '1' || v === 1;
 }
 
+/**
+ * A partir de lo que mandó el formulario (fecha de nacimiento o edad a mano),
+ * arma las columnas de edad a guardar. En modo "manual" se guarda tal cual lo
+ * escribió el dueño, sin normalizar (si puso 45 días, quedan 45 días, no "1 mes y 15 días").
+ * En modo "birth_date" se guarda la fecha y una foto de la edad actual, que después
+ * se recalcula en vivo cada vez que se muestra la publicación (ver serializePet).
+ */
+function buildAgeFields(b) {
+  if (b.ageMode === 'birth_date') {
+    const { years, months, days } = computeAgeFromBirthDate(b.birthDate);
+    return {
+      age_mode: 'birth_date',
+      birth_date: b.birthDate,
+      age_years: years,
+      age_months: months,
+      age_days: days,
+    };
+  }
+
+  return {
+    age_mode: 'manual',
+    birth_date: null,
+    age_years: b.ageYears || 0,
+    age_months: b.ageMonths || 0,
+    age_days: b.ageDays || 0,
+  };
+}
+
 function serializePet(pet, photos = []) {
+  // Si la edad se cargó por fecha de nacimiento, se recalcula al momento de mostrarla
+  // para que siempre sea la edad real de hoy, no una foto vieja de cuando se publicó.
+  const age = pet.age_mode === 'birth_date' && pet.birth_date
+    ? computeAgeFromBirthDate(pet.birth_date)
+    : { years: pet.age_years, months: pet.age_months, days: pet.age_days };
+
   return {
     id: pet.id,
     name: pet.name,
     species: { id: pet.species_id, name: pet.species_name, slug: pet.species_slug },
     breed: pet.breed,
     size: pet.size,
-    ageYears: pet.age_years,
-    ageMonths: pet.age_months,
+    ageMode: pet.age_mode,
+    birthDate: pet.birth_date,
+    ageYears: age.years,
+    ageMonths: age.months,
+    ageDays: age.days,
     sex: pet.sex,
     isVaccinated: Boolean(pet.is_vaccinated),
     isNeutered: Boolean(pet.is_neutered),
@@ -60,8 +98,7 @@ async function create(req, res) {
     name: b.name,
     breed: b.breed || null,
     size: b.size,
-    age_years: b.ageYears,
-    age_months: b.ageMonths,
+    ...buildAgeFields(b),
     sex: b.sex,
     is_vaccinated: toBool(b.isVaccinated),
     is_neutered: toBool(b.isNeutered),
@@ -106,7 +143,7 @@ async function update(req, res) {
   const changes = {};
   const map = {
     speciesId: 'species_id', name: 'name', breed: 'breed', size: 'size',
-    ageYears: 'age_years', ageMonths: 'age_months', sex: 'sex', description: 'description',
+    sex: 'sex', description: 'description',
     contactWhatsapp: 'contact_whatsapp', contactEmail: 'contact_email',
   };
   for (const [key, column] of Object.entries(map)) {
@@ -114,6 +151,9 @@ async function update(req, res) {
   }
   for (const key of ['isVaccinated', 'isNeutered', 'isDewormed']) {
     if (b[key] !== undefined) changes[key.replace(/([A-Z])/g, '_$1').toLowerCase()] = toBool(b[key]);
+  }
+  if (b.ageMode !== undefined) {
+    Object.assign(changes, buildAgeFields(b));
   }
 
   if (Object.keys(changes).length > 0) {

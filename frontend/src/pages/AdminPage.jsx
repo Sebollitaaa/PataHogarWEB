@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { adminApi } from '../api/admin';
-import { ShieldIcon } from '../components/icons/Icons';
+import { ShieldIcon, UserIcon } from '../components/icons/Icons';
 import { timeAgo } from '../utils/format';
+import '../components/row-list.css';
 import './admin.css';
 
 export default function AdminPage() {
@@ -65,33 +66,31 @@ function UsersTab() {
       <input className="input" placeholder="Buscar por nombre o email…" value={q} onChange={(e) => setQ(e.target.value)} style={{ maxWidth: 320, marginBottom: 16 }} />
       {message && <div className="alert alert-info" style={{ marginBottom: 16 }}>{message}</div>}
 
-      {!users ? null : (
-        <div className="admin-table">
-          <table>
-            <thead>
-              <tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Estado</th><th></th></tr>
-            </thead>
-            <tbody>
-              {users.map((u) => (
-                <tr key={u.id}>
-                  <td>{u.first_name} {u.last_name}</td>
-                  <td>{u.email}</td>
-                  <td>{u.role}</td>
-                  <td><span className={`badge ${u.status === 'active' ? 'badge-success' : 'badge-danger'}`}>{u.status === 'active' ? 'Activo' : 'Suspendido'}</span></td>
-                  <td className="admin-table__actions">
-                    {u.status === 'active' ? (
-                      <button className="btn btn-outline btn-sm" onClick={() => handleBan(u)}>Suspender</button>
-                    ) : (
-                      <button className="btn btn-outline btn-sm" onClick={() => handleUnban(u)}>Reactivar</button>
-                    )}
-                    <button className="btn btn-danger btn-sm" onClick={() => handleDelete(u)}>Eliminar</button>
-                  </td>
-                </tr>
-              ))}
-              {users.length === 0 && <tr><td colSpan={5} style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>Sin resultados.</td></tr>}
-            </tbody>
-          </table>
-        </div>
+      {!users ? null : users.length === 0 ? (
+        <div className="listing-empty"><p>Sin resultados.</p></div>
+      ) : (
+        <ul className="row-list">
+          {users.map((u) => (
+            <li key={u.id} className="row-card">
+              <span className="row-card__avatar"><UserIcon size={18} /></span>
+              <div className="row-card__info">
+                <strong>{u.first_name} {u.last_name}</strong>
+                <span className="row-card__meta">{u.email} · {u.role}</span>
+              </div>
+              <span className={`badge ${u.status === 'active' ? 'badge-success' : 'badge-danger'}`}>
+                {u.status === 'active' ? 'Activo' : 'Suspendido'}
+              </span>
+              <div className="row-card__actions">
+                {u.status === 'active' ? (
+                  <button className="btn btn-outline btn-sm" onClick={() => handleBan(u)}>Suspender</button>
+                ) : (
+                  <button className="btn btn-outline btn-sm" onClick={() => handleUnban(u)}>Reactivar</button>
+                )}
+                <button className="btn btn-danger btn-sm" onClick={() => handleDelete(u)}>Eliminar</button>
+              </div>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );
@@ -111,22 +110,20 @@ function ActionsTab() {
     flag_outdated_pet: 'Marcó una publicación como desactualizada',
   };
 
-  return !actions ? null : (
-    <div className="admin-table">
-      <table>
-        <thead><tr><th>Admin</th><th>Acción</th><th>Motivo</th><th>Cuándo</th></tr></thead>
-        <tbody>
-          {actions.map((a) => (
-            <tr key={a.id}>
-              <td>{a.admin_first_name} {a.admin_last_name}</td>
-              <td>{LABELS[a.action_type] || a.action_type}</td>
-              <td>{a.reason || '—'}</td>
-              <td>{timeAgo(a.created_at)}</td>
-            </tr>
-          ))}
-          {actions.length === 0 && <tr><td colSpan={4} style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>Sin acciones registradas.</td></tr>}
-        </tbody>
-      </table>
-    </div>
+  return !actions ? null : actions.length === 0 ? (
+    <div className="listing-empty"><p>Sin acciones registradas.</p></div>
+  ) : (
+    <ul className="row-list">
+      {actions.map((a) => (
+        <li key={a.id} className="row-card">
+          <span className="row-card__avatar"><ShieldIcon size={16} /></span>
+          <div className="row-card__info">
+            <strong>{a.admin_first_name} {a.admin_last_name}</strong>
+            <span className="row-card__meta">{LABELS[a.action_type] || a.action_type}{a.reason ? ` — ${a.reason}` : ''}</span>
+          </div>
+          <time className="row-card__time">{timeAgo(a.created_at)}</time>
+        </li>
+      ))}
+    </ul>
   );
 }

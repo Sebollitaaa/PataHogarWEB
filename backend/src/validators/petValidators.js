@@ -7,8 +7,15 @@ const createPetValidator = [
   body('name').trim().isLength({ min: 1, max: 100 }).withMessage('El nombre de la mascota es obligatorio.'),
   body('breed').optional({ checkFalsy: true }).trim().isLength({ max: 100 }),
   body('size').isIn(['pequeno', 'mediano', 'grande']).withMessage('Tamaño inválido.'),
-  body('ageYears').isInt({ min: 0, max: 40 }).withMessage('Edad (años) inválida.'),
-  body('ageMonths').isInt({ min: 0, max: 11 }).withMessage('Edad (meses) inválida.'),
+  body('ageMode').isIn(['birth_date', 'manual']).withMessage('Elegí cómo cargar la edad.'),
+  body('birthDate')
+    .if(body('ageMode').equals('birth_date'))
+    .isISO8601().withMessage('La fecha de nacimiento no es válida.')
+    .custom((value) => new Date(value) <= new Date())
+    .withMessage('La fecha de nacimiento no puede ser en el futuro.'),
+  body('ageYears').if(body('ageMode').equals('manual')).optional().isInt({ min: 0, max: 40 }).withMessage('Edad (años) inválida.'),
+  body('ageMonths').if(body('ageMode').equals('manual')).optional().isInt({ min: 0, max: 11 }).withMessage('Edad (meses) inválida.'),
+  body('ageDays').if(body('ageMode').equals('manual')).optional().isInt({ min: 0, max: 364 }).withMessage('Edad (días) inválida.'),
   body('sex').isIn(['macho', 'hembra']).withMessage('Sexo inválido.'),
   body('isVaccinated').optional().customSanitizer(toBool).isBoolean(),
   body('isNeutered').optional().customSanitizer(toBool).isBoolean(),
@@ -23,8 +30,15 @@ const updatePetValidator = [
   body('name').optional().trim().isLength({ min: 1, max: 100 }),
   body('breed').optional({ checkFalsy: true }).trim().isLength({ max: 100 }),
   body('size').optional().isIn(['pequeno', 'mediano', 'grande']),
-  body('ageYears').optional().isInt({ min: 0, max: 40 }),
-  body('ageMonths').optional().isInt({ min: 0, max: 11 }),
+  body('ageMode').optional().isIn(['birth_date', 'manual']),
+  body('birthDate')
+    .if(body('ageMode').equals('birth_date'))
+    .isISO8601().withMessage('La fecha de nacimiento no es válida.')
+    .custom((value) => new Date(value) <= new Date())
+    .withMessage('La fecha de nacimiento no puede ser en el futuro.'),
+  body('ageYears').if(body('ageMode').equals('manual')).optional().isInt({ min: 0, max: 40 }),
+  body('ageMonths').if(body('ageMode').equals('manual')).optional().isInt({ min: 0, max: 11 }),
+  body('ageDays').if(body('ageMode').equals('manual')).optional().isInt({ min: 0, max: 364 }),
   body('sex').optional().isIn(['macho', 'hembra']),
   body('isVaccinated').optional().customSanitizer(toBool).isBoolean(),
   body('isNeutered').optional().customSanitizer(toBool).isBoolean(),

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authApi } from '../api/auth';
 import Field from '../components/ui/Field';
-import { PawIcon } from '../components/icons/Icons';
+import logo from '../assets/logo-header.png';
 import './auth.css';
 
 export default function ForgotPasswordPage() {
@@ -25,7 +25,7 @@ export default function ForgotPasswordPage() {
   return (
     <div className="auth-page">
       <div className="card auth-card">
-        <div className="auth-card__brand"><PawIcon /> PataHogar</div>
+        <div className="auth-card__brand"><img src={logo} alt="" className="auth-card__logo" /> PataHogar</div>
         <h1>Recuperar contraseña</h1>
         <p className="auth-card__subtitle">Te mandamos un código para definir una nueva.</p>
 

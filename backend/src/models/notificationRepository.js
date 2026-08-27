@@ -34,4 +34,15 @@ function markAllRead(userId) {
   return db('notifications').where({ user_id: userId, is_read: false }).update({ is_read: true });
 }
 
-module.exports = { create, findById, findByUser, countByUser, countUnread, markRead, markAllRead };
+// Se usa al abrir un chat: las notificaciones de mensajes de esa conversación puntual
+// (new_message_on_your_pet / reply_to_inquiry) dejan de figurar como no leídas en la campanita.
+function markReadByConversation(userId, conversationId) {
+  return db('notifications')
+    .where({ user_id: userId, is_read: false })
+    .andWhereRaw("JSON_UNQUOTE(JSON_EXTRACT(payload, '$.conversationId')) = ?", [String(conversationId)])
+    .update({ is_read: true });
+}
+
+module.exports = {
+  create, findById, findByUser, countByUser, countUnread, markRead, markAllRead, markReadByConversation,
+};

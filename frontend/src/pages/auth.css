@@ -22,6 +22,12 @@
   margin-bottom: var(--space-4);
 }
 
+.auth-card__logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
 .auth-card h1 {
   font-size: 1.4rem;
   margin-bottom: var(--space-1);

@@ -1,27 +1,27 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authApi } from '../api/auth';
-import { catalogApi } from '../api/catalog';
 import { getBrowserLocation } from '../utils/geolocation';
 import Field from '../components/ui/Field';
-import { PawIcon, MapPinIcon } from '../components/icons/Icons';
+import CityAutocomplete from '../components/CityAutocomplete';
+import { MapPinIcon } from '../components/icons/Icons';
+import logo from '../assets/logo-header.png';
 import './auth.css';
 
 const initialForm = {
-  firstName: '', lastName: '', email: '', password: '', confirmPassword: '', phone: '', cityId: '',
+  firstName: '', lastName: '', email: '', password: '', confirmPassword: '', phone: '',
 };
 
 export default function RegisterPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState(initialForm);
-  const [cities, setCities] = useState([]);
+  const [city, setCity] = useState(null);
   const [location, setLocation] = useState(null);
   const [locationStatus, setLocationStatus] = useState('pidiendo');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    catalogApi.cities().then((d) => setCities(d.cities)).catch(() => {});
     getBrowserLocation().then((loc) => {
       setLocation(loc);
       setLocationStatus(loc ? 'ok' : 'denegada');
@@ -40,20 +40,33 @@ export default function RegisterPage() {
       setError('Las contraseñas no coinciden.');
       return;
     }
+    if (!city) {
+      setError('Elegí tu ciudad de la lista de sugerencias.');
+      return;
+    }
 
     setLoading(true);
     try {
-      await authApi.register({
+      const data = await authApi.register({
         firstName: form.firstName,
         lastName: form.lastName,
         email: form.email,
         password: form.password,
         phone: form.phone,
-        cityId: form.cityId,
+        cityGeorefId: city.georefId,
+        cityName: city.name,
+        cityProvince: city.province,
+        cityLat: city.latitude,
+        cityLng: city.longitude,
         verifiedLat: location?.lat,
         verifiedLng: location?.lng,
       });
-      navigate(`/verificar-email?email=${encodeURIComponent(form.email)}`);
+
+      if (data.requiresVerification === false) {
+        navigate('/ingresar', { state: { verified: true } });
+      } else {
+        navigate(`/verificar-email?email=${encodeURIComponent(form.email)}`);
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -64,7 +77,7 @@ export default function RegisterPage() {
   return (
     <div className="auth-page">
       <div className="card auth-card" style={{ maxWidth: 480 }}>
-        <div className="auth-card__brand"><PawIcon /> PataHogar</div>
+        <div className="auth-card__brand"><img src={logo} alt="" className="auth-card__logo" /> PataHogar</div>
         <h1>Creá tu cuenta</h1>
         <p className="auth-card__subtitle">Es gratis y te toma menos de un minuto.</p>
 
@@ -88,13 +101,8 @@ export default function RegisterPage() {
             <input id="phone" className="input" required placeholder="+54 9 11 1234-5678" value={form.phone} onChange={(e) => set('phone', e.target.value)} />
           </Field>
 
-          <Field label="Ciudad" htmlFor="cityId">
-            <select id="cityId" className="input" required value={form.cityId} onChange={(e) => set('cityId', e.target.value)}>
-              <option value="">Elegí tu ciudad</option>
-              {cities.map((c) => (
-                <option key={c.id} value={c.id}>{c.name} ({c.province})</option>
-              ))}
-            </select>
+          <Field label="Ciudad o pueblo" htmlFor="city">
+            <CityAutocomplete id="city" value={city} onChange={setCity} />
           </Field>
 
           <div className="location-hint">

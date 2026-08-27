@@ -6,9 +6,10 @@ import { useOnClickOutside } from '../../hooks/useOnClickOutside';
 import { timeAgo } from '../../utils/format';
 import { notificationText, notificationLink } from '../../utils/notificationText';
 import {
-  PawIcon, BellIcon, HeartIcon, PlusIcon, UserIcon, ChevronDownIcon,
+  BellIcon, HeartIcon, PlusIcon, UserIcon, ChevronDownIcon,
   LogOutIcon, ShieldIcon, MessageIcon,
 } from '../icons/Icons';
+import logo from '../../assets/logo-header.png';
 import './header.css';
 
 export default function Header() {
@@ -19,7 +20,7 @@ export default function Header() {
     <header className="site-header">
       <div className="container site-header__inner">
         <Link to="/" className="brand">
-          <PawIcon size={26} />
+          <img src={logo} alt="PataHogar" className="brand__logo" />
           <span>PataHogar</span>
         </Link>
 

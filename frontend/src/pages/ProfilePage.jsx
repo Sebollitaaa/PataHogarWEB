@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { usersApi } from '../api/users';
-import { catalogApi } from '../api/catalog';
 import { getBrowserLocation } from '../utils/geolocation';
 import Field from '../components/ui/Field';
+import CityAutocomplete from '../components/CityAutocomplete';
 import { CameraIcon, UserIcon } from '../components/icons/Icons';
 import './profile.css';
 
@@ -11,9 +11,10 @@ const API_ORIGIN = import.meta.env.VITE_SOCKET_URL;
 
 export default function ProfilePage() {
   const { user, setUser } = useAuth();
-  const [cities, setCities] = useState([]);
   const [phone, setPhone] = useState(user.phone);
-  const [cityId, setCityId] = useState(String(user.cityId));
+  const [city, setCity] = useState(
+    user.cityName ? { georefId: null, name: user.cityName, province: user.cityProvince } : null
+  );
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(user.profilePhotoUrl ? `${API_ORIGIN}${user.profilePhotoUrl}` : null);
   const fileInputRef = useRef(null);
@@ -25,10 +26,6 @@ export default function ProfilePage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    catalogApi.cities().then((d) => setCities(d.cities));
-  }, []);
 
   function handlePhotoSelect(e) {
     const file = e.target.files?.[0];
@@ -52,8 +49,14 @@ export default function ProfilePage() {
       const fd = new FormData();
       if (phone !== user.phone) fd.append('phone', phone);
 
-      if (String(cityId) !== String(user.cityId)) {
-        fd.append('cityId', cityId);
+      // Solo mandamos la ciudad si el usuario efectivamente eligió una nueva de la lista
+      // (tiene georefId); si no tocó el campo, se mantiene la que ya tenía.
+      if (city?.georefId) {
+        fd.append('cityGeorefId', city.georefId);
+        fd.append('cityName', city.name);
+        fd.append('cityProvince', city.province);
+        fd.append('cityLat', city.latitude);
+        fd.append('cityLng', city.longitude);
         const loc = await getBrowserLocation();
         if (loc) {
           fd.append('verifiedLat', loc.lat);
@@ -71,6 +74,7 @@ export default function ProfilePage() {
 
       const { user: updated, passwordChanged } = await usersApi.updateMe(fd);
       setUser(updated);
+      setCity(updated.cityName ? { georefId: null, name: updated.cityName, province: updated.cityProvince } : null);
       setCurrentPassword('');
       setNewPassword('');
       setConfirmNewPassword('');
@@ -113,10 +117,8 @@ export default function ProfilePage() {
           <Field label="Teléfono" htmlFor="phone">
             <input id="phone" className="input" value={phone} onChange={(e) => setPhone(e.target.value)} />
           </Field>
-          <Field label="Ciudad" htmlFor="cityId" hint="Si la cambiás, te vamos a pedir tu ubicación de nuevo para verificarla.">
-            <select id="cityId" className="input" value={cityId} onChange={(e) => setCityId(e.target.value)}>
-              {cities.map((c) => <option key={c.id} value={c.id}>{c.name} ({c.province})</option>)}
-            </select>
+          <Field label="Ciudad" htmlFor="city" hint="Si la cambiás, te vamos a pedir tu ubicación de nuevo para verificarla.">
+            <CityAutocomplete id="city" value={city} onChange={setCity} />
           </Field>
 
           <h3 className="profile-section-title">Cambiar contraseña</h3>

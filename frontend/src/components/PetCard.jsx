@@ -36,7 +36,7 @@ export default function PetCard({ pet, isFavorite, onToggleFavorite, showFavorit
       <Link to={`/mascotas/${pet.id}`} className="pet-card__body">
         <h3>{pet.name}</h3>
         <p className="pet-card__meta">{pet.species.name}{pet.breed ? ` · ${pet.breed}` : ''} · {sizeLabel(pet.size)}</p>
-        <p className="pet-card__meta">{formatAge(pet.ageYears, pet.ageMonths)}</p>
+        <p className="pet-card__meta">{formatAge(pet.ageYears, pet.ageMonths, pet.ageDays)}</p>
         {pet.distanceKm !== undefined && (
           <p className="pet-card__distance"><MapPinIcon size={14} /> {formatDistance(pet.distanceKm)}</p>
         )}

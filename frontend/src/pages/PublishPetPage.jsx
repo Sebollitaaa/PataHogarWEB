@@ -4,10 +4,13 @@ import { petsApi } from '../api/pets';
 import { catalogApi } from '../api/catalog';
 import Field from '../components/ui/Field';
 import PhotoPicker from '../components/PhotoPicker';
+import AgeInput from '../components/AgeInput';
 import './publish.css';
 
 const initialForm = {
-  speciesId: '', name: '', breed: '', size: 'mediano', ageYears: '0', ageMonths: '0', sex: 'macho',
+  speciesId: '', name: '', breed: '', size: 'mediano',
+  ageMode: 'manual', birthDate: '', ageYears: '0', ageMonths: '0', ageDays: '0',
+  sex: 'macho',
   isVaccinated: false, isNeutered: false, isDewormed: false, description: '',
   contactWhatsapp: '', contactEmail: '',
 };
@@ -80,7 +83,7 @@ export default function PublishPetPage() {
             </Field>
           </div>
 
-          <div className="field-row-3">
+          <div className="field-row">
             <Field label="Tamaño" htmlFor="size">
               <select id="size" className="input" value={form.size} onChange={(e) => set('size', e.target.value)}>
                 <option value="pequeno">Pequeño</option>
@@ -94,13 +97,18 @@ export default function PublishPetPage() {
                 <option value="hembra">Hembra</option>
               </select>
             </Field>
-            <Field label="Edad aproximada">
-              <div style={{ display: 'flex', gap: 8 }}>
-                <input type="number" min="0" max="40" className="input" placeholder="Años" value={form.ageYears} onChange={(e) => set('ageYears', e.target.value)} />
-                <input type="number" min="0" max="11" className="input" placeholder="Meses" value={form.ageMonths} onChange={(e) => set('ageMonths', e.target.value)} />
-              </div>
-            </Field>
           </div>
+
+          <Field label="Edad">
+            <AgeInput
+              ageMode={form.ageMode}
+              birthDate={form.birthDate}
+              ageYears={form.ageYears}
+              ageMonths={form.ageMonths}
+              ageDays={form.ageDays}
+              onChange={(patch) => setForm((f) => ({ ...f, ...patch }))}
+            />
+          </Field>
 
           <Field label="Estado de salud">
             <label className="checkbox-row"><input type="checkbox" checked={form.isVaccinated} onChange={(e) => set('isVaccinated', e.target.checked)} /> Vacunado</label>

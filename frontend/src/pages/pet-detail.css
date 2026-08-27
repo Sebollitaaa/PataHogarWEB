@@ -83,6 +83,12 @@
   color: var(--color-text-muted);
   margin-bottom: var(--space-4);
 }
+.pet-detail__owner-link strong {
+  color: var(--color-primary-dark);
+}
+.pet-detail__owner-link:hover strong {
+  text-decoration: underline;
+}
 
 .pet-detail__contact-buttons {
   display: flex;

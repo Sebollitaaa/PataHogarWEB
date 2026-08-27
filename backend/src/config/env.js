@@ -41,4 +41,12 @@ module.exports = {
 
   verificationCodeExpiresMin: parseInt(process.env.VERIFICATION_CODE_EXPIRES_MIN, 10) || 15,
   locationMismatchBlockKm: parseFloat(process.env.LOCATION_MISMATCH_BLOCK_KM) || 100,
+
+  // Restricción opcional de registro solo a Gmail (ver validators/authValidators.js). Apagada por defecto.
+  allowOnlyGmailRegistration: (process.env.ALLOW_ONLY_GMAIL_REGISTRATION ?? 'false') === 'true',
+
+  // Mientras el envío de emails no esté 100% resuelto (dominio propio verificado en Resend),
+  // esto permite registrarse con cualquier email y quedar verificado al toque, sin código.
+  // Apagar (poner en 'false') antes de ir a producción real.
+  skipEmailVerification: (process.env.SKIP_EMAIL_VERIFICATION ?? 'false') === 'true',
 };

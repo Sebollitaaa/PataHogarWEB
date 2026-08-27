@@ -14,7 +14,24 @@ function findById(id) {
 }
 
 function findPublicById(id) {
-  return db('users').select(PUBLIC_COLUMNS).where({ id }).first();
+  return db('users')
+    .select(...PUBLIC_COLUMNS.map((c) => `users.${c}`), 'cities.name as city_name', 'cities.province as city_province')
+    .leftJoin('cities', 'cities.id', 'users.city_id')
+    .where({ 'users.id': id })
+    .first();
+}
+
+/** Perfil visible por cualquiera (sin email/teléfono): para que un adoptante pueda
+ * revisar quién publica antes de contactarlo. */
+function findPublicProfile(id) {
+  return db('users')
+    .select(
+      'users.id', 'users.first_name', 'users.last_name', 'users.profile_photo_url',
+      'users.created_at', 'cities.name as city_name', 'cities.province as city_province'
+    )
+    .leftJoin('cities', 'cities.id', 'users.city_id')
+    .where({ 'users.id': id, 'users.status': 'active' })
+    .first();
 }
 
 async function create(user) {
@@ -26,4 +43,4 @@ function update(id, changes) {
   return db('users').where({ id }).update(changes);
 }
 
-module.exports = { findByEmail, findById, findPublicById, create, update, PUBLIC_COLUMNS };
+module.exports = { findByEmail, findById, findPublicById, findPublicProfile, create, update, PUBLIC_COLUMNS };

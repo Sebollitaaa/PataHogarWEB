@@ -20,6 +20,7 @@ import FavoritesPage from './pages/FavoritesPage';
 import MessagesPage from './pages/MessagesPage';
 import NotificationsPage from './pages/NotificationsPage';
 import ProfilePage from './pages/ProfilePage';
+import PublicProfilePage from './pages/PublicProfilePage';
 import AdminPage from './pages/AdminPage';
 import NotFoundPage from './pages/NotFoundPage';
 
@@ -33,6 +34,7 @@ export default function App() {
               <Route element={<Layout />}>
                 <Route index element={<HomePage />} />
                 <Route path="mascotas/:id" element={<PetDetailPage />} />
+                <Route path="usuarios/:id" element={<PublicProfilePage />} />
                 <Route path="ingresar" element={<LoginPage />} />
                 <Route path="registro" element={<RegisterPage />} />
                 <Route path="verificar-email" element={<VerifyEmailPage />} />

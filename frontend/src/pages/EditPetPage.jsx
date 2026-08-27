@@ -5,6 +5,7 @@ import { catalogApi } from '../api/catalog';
 import { useAuth } from '../context/AuthContext';
 import Field from '../components/ui/Field';
 import PhotoPicker from '../components/PhotoPicker';
+import AgeInput from '../components/AgeInput';
 import FullPageSpinner from '../components/ui/FullPageSpinner';
 import { XIcon } from '../components/icons/Icons';
 import './publish.css';
@@ -35,7 +36,9 @@ export default function EditPetPage() {
       setPet(pet);
       setForm({
         speciesId: pet.species.id, name: pet.name, breed: pet.breed || '', size: pet.size,
-        ageYears: pet.ageYears, ageMonths: pet.ageMonths, sex: pet.sex,
+        ageMode: pet.ageMode, birthDate: pet.birthDate ? pet.birthDate.slice(0, 10) : '',
+        ageYears: pet.ageYears, ageMonths: pet.ageMonths, ageDays: pet.ageDays,
+        sex: pet.sex,
         isVaccinated: pet.isVaccinated, isNeutered: pet.isNeutered, isDewormed: pet.isDewormed,
         description: pet.description, contactWhatsapp: pet.contactWhatsapp || '', contactEmail: pet.contactEmail || '',
       });
@@ -135,7 +138,7 @@ export default function EditPetPage() {
             </Field>
           </div>
 
-          <div className="field-row-3">
+          <div className="field-row">
             <Field label="Tamaño" htmlFor="size">
               <select id="size" className="input" value={form.size} onChange={(e) => set('size', e.target.value)}>
                 <option value="pequeno">Pequeño</option>
@@ -149,13 +152,18 @@ export default function EditPetPage() {
                 <option value="hembra">Hembra</option>
               </select>
             </Field>
-            <Field label="Edad aproximada">
-              <div style={{ display: 'flex', gap: 8 }}>
-                <input type="number" min="0" max="40" className="input" placeholder="Años" value={form.ageYears} onChange={(e) => set('ageYears', e.target.value)} />
-                <input type="number" min="0" max="11" className="input" placeholder="Meses" value={form.ageMonths} onChange={(e) => set('ageMonths', e.target.value)} />
-              </div>
-            </Field>
           </div>
+
+          <Field label="Edad">
+            <AgeInput
+              ageMode={form.ageMode}
+              birthDate={form.birthDate}
+              ageYears={form.ageYears}
+              ageMonths={form.ageMonths}
+              ageDays={form.ageDays}
+              onChange={(patch) => setForm((f) => ({ ...f, ...patch }))}
+            />
+          </Field>
 
           <Field label="Estado de salud">
             <label className="checkbox-row"><input type="checkbox" checked={form.isVaccinated} onChange={(e) => set('isVaccinated', e.target.checked)} /> Vacunado</label>

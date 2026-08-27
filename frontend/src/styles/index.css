@@ -236,6 +236,29 @@ h1, h2, h3, h4, p {
   font-size: 0.88rem;
 }
 
+.segmented {
+  display: flex;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.segmented__item {
+  flex: 1;
+  border: none;
+  background: var(--color-surface);
+  padding: 0.5rem 0.4rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  border-right: 1px solid var(--color-border-strong);
+}
+.segmented__item:last-child { border-right: none; }
+.segmented__item--active {
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  font-weight: 700;
+}
+
 /* ---------- Tarjetas ---------- */
 .card {
   background: var(--color-surface);

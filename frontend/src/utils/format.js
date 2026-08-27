@@ -1,3 +1,8 @@
+export function memberSince(dateString) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
+}
+
 export function timeAgo(dateString) {
   const date = new Date(dateString);
   const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
@@ -11,11 +16,17 @@ export function timeAgo(dateString) {
   return date.toLocaleDateString('es-AR', { day: 'numeric', month: 'short' });
 }
 
-export function formatAge(years, months) {
+// Solo muestra las unidades que tienen valor: si años es 0, ni aparece (no "0 años, 4 meses").
+// Si solo hay días (ej. 45), se muestran tal cual, sin convertirlos a "1 mes y 15 días".
+export function formatAge(years, months, days) {
   const parts = [];
   if (years > 0) parts.push(`${years} ${years === 1 ? 'año' : 'años'}`);
   if (months > 0) parts.push(`${months} ${months === 1 ? 'mes' : 'meses'}`);
-  return parts.length ? parts.join(' y ') : 'Cachorro/a';
+  if (days > 0) parts.push(`${days} ${days === 1 ? 'día' : 'días'}`);
+
+  if (parts.length === 0) return 'Recién nacido/a';
+  if (parts.length === 1) return parts[0];
+  return `${parts.slice(0, -1).join(', ')} y ${parts[parts.length - 1]}`;
 }
 
 export function formatDistance(km) {

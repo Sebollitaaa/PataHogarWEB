@@ -1,3 +1,4 @@
+import CityAutocomplete from './CityAutocomplete';
 import { FilterIcon } from './icons/Icons';
 import './filter-sidebar.css';
 
@@ -10,7 +11,7 @@ const SIZES = [
 
 const DISTANCES = [25, 50, 100, 250, 500];
 
-export default function FilterSidebar({ filters, onChange, cities, onReset }) {
+export default function FilterSidebar({ filters, onChange, onReset }) {
   function set(patch) {
     onChange({ ...filters, ...patch });
   }
@@ -25,13 +26,14 @@ export default function FilterSidebar({ filters, onChange, cities, onReset }) {
 
       <div className="field">
         <label>Ubicación</label>
-        <select className="input" value={filters.cityId} onChange={(e) => set({ cityId: e.target.value })}>
-          <option value="">Todo el país</option>
-          {cities.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-        </select>
+        <CityAutocomplete
+          value={filters.city}
+          onChange={(city) => set({ city })}
+          placeholder="Todo el país"
+        />
       </div>
 
-      {filters.cityId && (
+      {filters.city && (
         <div className="field">
           <label>Distancia máxima</label>
           <select className="input" value={filters.maxDistanceKm} onChange={(e) => set({ maxDistanceKm: e.target.value })}>

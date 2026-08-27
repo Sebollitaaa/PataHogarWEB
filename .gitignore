@@ -1,45 +1,8 @@
-# Dependencias
-node_modules/
-**/node_modules/
+# Volcados de base de datos: pueden tener emails y hashes de contraseñas reales.
+database/*.sql
 
-# Variables de entorno / secretos
+# Por si algún día se corre algo en la raíz del proyecto.
+node_modules/
 .env
 .env.*
 !.env.example
-**/.env
-!**/.env.example
-
-# Builds
-dist/
-dist-ssr/
-build/
-frontend/dist/
-
-# Logs
-logs/
-*.log
-**/logs/*
-!**/logs/.gitkeep
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# Uploads (contenido subido por usuarios)
-backend/uploads/*
-!backend/uploads/.gitkeep
-!backend/uploads/**/.gitkeep
-
-# Backups de base de datos (contienen datos personales)
-database/*.sql
-*.sql.gz
-*.dump
-
-# Sistema operativo / editores
-.DS_Store
-Thumbs.db
-.vscode/*
-!.vscode/extensions.json
-.idea/
-*.suo
-*.swp

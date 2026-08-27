@@ -24,6 +24,12 @@
   flex-shrink: 0;
 }
 
+.brand__logo {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
 .site-header__nav {
   display: flex;
   align-items: center;
