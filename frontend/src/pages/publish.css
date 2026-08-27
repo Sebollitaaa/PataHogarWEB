@@ -1,0 +1,32 @@
+.publish-page {
+  padding: var(--space-6) 0 var(--space-8);
+  display: flex;
+  justify-content: center;
+}
+
+.publish-card {
+  width: 100%;
+  max-width: 760px;
+  padding: var(--space-6);
+}
+
+.publish-card h1 {
+  font-size: 1.5rem;
+  margin-bottom: 4px;
+}
+
+.publish-subtitle {
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  margin-bottom: var(--space-5);
+}
+
+.field-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: var(--space-3);
+}
+
+@media (max-width: 720px) {
+  .field-row-3 { grid-template-columns: 1fr; }
+}

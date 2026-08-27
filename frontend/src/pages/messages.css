@@ -1,0 +1,197 @@
+.messages-page {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  height: calc(100vh - var(--header-height));
+  border-top: 1px solid var(--color-border);
+}
+
+.messages-sidebar {
+  border-right: 1px solid var(--color-border);
+  overflow-y: auto;
+  padding: var(--space-4) 0;
+}
+.messages-sidebar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-4) var(--space-3);
+}
+.messages-sidebar__header h2 {
+  font-size: 1.05rem;
+}
+
+.messages-empty {
+  padding: var(--space-5);
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+.messages-empty--center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+}
+
+.conversation-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.conversation-list__person {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  border: none;
+  background: none;
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  text-align: left;
+}
+.conversation-list__person:hover {
+  background: var(--color-surface-alt);
+}
+.conversation-list__person-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  font-size: 0.85rem;
+}
+.conversation-list__preview {
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.badge-dot-static {
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+.conversation-list__subchats {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 var(--space-2);
+  background: var(--color-surface-alt);
+}
+.conversation-list__subchats button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  border: none;
+  background: none;
+  padding: var(--space-2) var(--space-4) var(--space-2) var(--space-7);
+  font-size: 0.82rem;
+  cursor: pointer;
+  color: var(--color-text-muted);
+}
+.conversation-list__subchats button.active {
+  color: var(--color-primary-dark);
+  font-weight: 700;
+}
+.conversation-list__subchats button:hover {
+  background: var(--color-border);
+}
+
+.messages-thread {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.messages-thread__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.9rem;
+}
+.messages-thread__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.bubble {
+  max-width: 60%;
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.8rem;
+  align-self: flex-start;
+}
+.bubble p {
+  font-size: 0.88rem;
+  white-space: pre-wrap;
+}
+.bubble time {
+  display: block;
+  font-size: 0.68rem;
+  color: var(--color-text-faint);
+  margin-top: 2px;
+  text-align: right;
+}
+.bubble--own {
+  align-self: flex-end;
+  background: var(--color-primary-light);
+  border-color: #cfe4de;
+}
+
+.messages-thread__composer {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-border);
+}
+.messages-thread__composer .input {
+  flex: 1;
+}
+
+@media (max-width: 800px) {
+  .messages-page {
+    grid-template-columns: 1fr;
+  }
+  .messages-page.has-active-chat .messages-sidebar {
+    display: none;
+  }
+  .messages-page:not(.has-active-chat) .messages-thread {
+    display: none;
+  }
+  .messages-thread__header .mobile-back {
+    display: inline-flex;
+  }
+}
+
+.mobile-back {
+  display: none;
+}
