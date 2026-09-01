@@ -10,6 +10,7 @@ import {
   LogOutIcon, ShieldIcon, MessageIcon,
 } from '../icons/Icons';
 import logo from '../../assets/logo-header.png';
+import { API_ORIGIN } from '../../api/origin';
 import './header.css';
 
 export default function Header() {
@@ -114,7 +115,7 @@ function UserMenu({ user, onLogout }) {
     <div className="dropdown" ref={ref}>
       <button className="user-chip" onClick={() => setOpen((o) => !o)}>
         {user.profilePhotoUrl ? (
-          <img src={`${import.meta.env.VITE_SOCKET_URL}${user.profilePhotoUrl}`} alt="" className="user-chip__avatar" />
+          <img src={`${API_ORIGIN}${user.profilePhotoUrl}`} alt="" className="user-chip__avatar" />
         ) : (
           <span className="user-chip__avatar user-chip__avatar--placeholder"><UserIcon size={16} /></span>
         )}

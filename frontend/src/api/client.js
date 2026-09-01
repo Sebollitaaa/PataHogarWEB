@@ -1,4 +1,7 @@
-const API_URL = import.meta.env.VITE_API_URL;
+// En desarrollo (LAN, dos puertos distintos) hace falta la URL completa del backend.
+// En producción, el backend sirve el frontend desde el mismo origen, así que alcanza
+// con una ruta relativa — ni hay que configurar nada al desplegar.
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 let accessToken = null;
 let onUnauthorized = null;

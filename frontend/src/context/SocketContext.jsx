@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 import { getAccessToken } from '../api/client';
+import { SOCKET_URL } from '../api/origin';
 
 const SocketContext = createContext(null);
 
@@ -20,7 +21,9 @@ export function SocketProvider({ children }) {
       return;
     }
 
-    const socket = io(import.meta.env.VITE_SOCKET_URL, {
+    // Sin SOCKET_URL (producción, mismo origen), socket.io-client se conecta
+    // solo a la página actual.
+    const socket = io(SOCKET_URL, {
       auth: { token: getAccessToken() },
     });
     socket.on('connect', () => setConnected(true));

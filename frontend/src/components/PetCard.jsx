@@ -1,9 +1,8 @@
 import { Link } from 'react-router-dom';
 import { HeartIcon, MapPinIcon } from './icons/Icons';
 import { formatAge, formatDistance, sizeLabel } from '../utils/format';
+import { API_ORIGIN } from '../api/origin';
 import './pet-card.css';
-
-const API_ORIGIN = import.meta.env.VITE_SOCKET_URL;
 
 export default function PetCard({ pet, isFavorite, onToggleFavorite, showFavoriteButton }) {
   const cover = pet.photos?.[0];

@@ -9,9 +9,8 @@ import {
   HeartIcon, WhatsAppIcon, MailIcon, EditIcon, TrashIcon, AlertIcon,
 } from '../components/icons/Icons';
 import { formatAge, sizeLabel, sexLabel, statusLabel } from '../utils/format';
+import { API_ORIGIN } from '../api/origin';
 import './pet-detail.css';
-
-const API_ORIGIN = import.meta.env.VITE_SOCKET_URL;
 
 export default function PetDetailPage() {
   const { id } = useParams();

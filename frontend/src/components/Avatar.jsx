@@ -1,7 +1,6 @@
 import { UserIcon } from './icons/Icons';
+import { API_ORIGIN } from '../api/origin';
 import './avatar.css';
-
-const API_ORIGIN = import.meta.env.VITE_SOCKET_URL;
 
 export default function Avatar({ url, size = 34, alt = '' }) {
   const style = { width: size, height: size };

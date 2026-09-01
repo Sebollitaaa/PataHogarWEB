@@ -5,9 +5,8 @@ import { getBrowserLocation } from '../utils/geolocation';
 import Field from '../components/ui/Field';
 import CityAutocomplete from '../components/CityAutocomplete';
 import { CameraIcon, UserIcon } from '../components/icons/Icons';
+import { API_ORIGIN } from '../api/origin';
 import './profile.css';
-
-const API_ORIGIN = import.meta.env.VITE_SOCKET_URL;
 
 export default function ProfilePage() {
   const { user, setUser } = useAuth();

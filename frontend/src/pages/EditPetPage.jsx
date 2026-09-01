@@ -8,9 +8,8 @@ import PhotoPicker from '../components/PhotoPicker';
 import AgeInput from '../components/AgeInput';
 import FullPageSpinner from '../components/ui/FullPageSpinner';
 import { XIcon } from '../components/icons/Icons';
+import { API_ORIGIN } from '../api/origin';
 import './publish.css';
-
-const API_ORIGIN = import.meta.env.VITE_SOCKET_URL;
 
 export default function EditPetPage() {
   const { id } = useParams();
