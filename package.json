@@ -3,6 +3,9 @@
   "private": true,
   "version": "1.0.0",
   "description": "PataHogar — plataforma de adopción de mascotas (monorepo: backend + frontend)",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
     "install:backend": "npm install --prefix backend",
     "install:frontend": "npm install --prefix frontend",
