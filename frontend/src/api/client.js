@@ -51,6 +51,7 @@ class ApiError extends Error {
 async function request(path, { method = 'GET', body, isForm = false, retry = true } = {}) {
   const headers = {};
   if (!isForm) headers['Content-Type'] = 'application/json';
+  const hadToken = Boolean(accessToken);
   if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
 
   const res = await fetch(`${API_URL}${path}`, {
@@ -60,7 +61,10 @@ async function request(path, { method = 'GET', body, isForm = false, retry = tru
     body: body ? (isForm ? body : JSON.stringify(body)) : undefined,
   });
 
-  if (res.status === 401 && retry && path !== '/auth/refresh') {
+  // Un 401 solo significa "sesión vencida" si la request llevaba un token de acceso.
+  // Sin token (ej: login con contraseña incorrecta, o un endpoint público) un 401 es
+  // un error normal del servidor y hay que mostrar su mensaje real, no intentar refrescar.
+  if (res.status === 401 && retry && hadToken && path !== '/auth/refresh') {
     try {
       await refreshAccessToken();
       return request(path, { method, body, isForm, retry: false });
