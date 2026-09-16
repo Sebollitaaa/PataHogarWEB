@@ -1,5 +1,6 @@
 # Volcados de base de datos: pueden tener emails y hashes de contraseñas reales.
 database/*.sql
+db_backup/
 
 # Por si algún día se corre algo en la raíz del proyecto.
 node_modules/

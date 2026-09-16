@@ -51,12 +51,11 @@ flowchart LR
     end
 
     subgraph Datos["Almacenamiento"]
-        DB[("MySQL<br/>(vía XAMPP)")]
+        DB[("MySQL<br/>(motor propio, local)")]
         FS["Disco<br/>uploads/ (fotos)"]
     end
 
     subgraph Externos["Servicios externos"]
-        RESEND["Resend<br/>(envío de emails)"]
         GEOREF["API Georef<br/>(Gob. Argentina)<br/>ciudades/pueblos"]
     end
 
@@ -64,7 +63,6 @@ flowchart LR
     FE <-- "WebSocket<br/>(chat en vivo)" --> WS
     BE --> DB
     BE --> FS
-    BE -- "manda códigos<br/>de verificación" --> RESEND
     BE -- "busca localidades" --> GEOREF
 ```
 
@@ -80,17 +78,16 @@ flowchart LR
 |---|---|---|
 | **Node.js** | Un entorno para correr JavaScript fuera del navegador (en un servidor). | Permite usar el mismo lenguaje (JavaScript) en el frontend y el backend, lo que simplifica mucho el desarrollo. Es rápido para aplicaciones con muchas conexiones simultáneas (como un chat), porque maneja las tareas de entrada/salida (leer de la base, mandar por la red) de forma **asíncrona** — no se queda "trabado" esperando una tarea, sigue atendiendo otras mientras tanto. |
 | **Express** | Un *framework* (conjunto de herramientas ya armadas) para construir servidores web con Node. | Sin Express tendríamos que escribir a mano cómo interpretar cada URL, cada método HTTP, etc. Express ya trae todo eso resuelto y es el estándar de facto en el ecosistema Node — hay muchísima documentación y ejemplos. |
-| **MySQL** (vía XAMPP, motor MariaDB) | Un sistema de base de datos **relacional**: guarda la información en tablas con filas y columnas, relacionadas entre sí por claves. | Los datos de esta app son claramente relacionales: un usuario *tiene* mascotas, una mascota *tiene* fotos, una conversación *conecta* a dos usuarios. Una base relacional impone esas relaciones a nivel de la base (con `FOREIGN KEY`), evitando datos "huérfanos" o inconsistentes. Elegimos MySQL porque XAMPP ya lo trae instalado y es gratuito y muy usado. |
+| **MySQL** (motor Community Server standalone) | Un sistema de base de datos **relacional**: guarda la información en tablas con filas y columnas, relacionadas entre sí por claves. | Los datos de esta app son claramente relacionales: un usuario *tiene* mascotas, una mascota *tiene* fotos, una conversación *conecta* a dos usuarios. Una base relacional impone esas relaciones a nivel de la base (con `FOREIGN KEY`), evitando datos "huérfanos" o inconsistentes. Elegimos MySQL (el mismo motor que corre en producción) para que el comportamiento sea idéntico en desarrollo y en el servidor real. |
 | **Knex.js** | Un *query builder*: una librería que arma las consultas SQL por vos usando funciones de JavaScript, en vez de escribir el SQL a mano como texto. | Dos motivos: (1) **seguridad** — Knex arma las consultas de forma *parametrizada*, así que es imposible que alguien inyecte SQL malicioso a través de un formulario (ver [sección 16](#16-seguridad-qué-se-hizo-y-por-qué)); (2) **migraciones** — Knex permite versionar los cambios a la estructura de la base de datos como si fueran commits de Git (ver [sección 5.3](#53-las-migraciones-versionar-la-base-de-datos)). |
 | **JWT** (`jsonwebtoken`) | *JSON Web Token*: un "carnet digital" firmado que prueba quién sos, sin que el servidor tenga que recordar cada sesión activa. | Explicado a fondo en la [sección 7](#7-autenticación-cómo-sabe-el-sistema-quién-sos). |
 | **bcrypt** | Un algoritmo para transformar una contraseña en un *hash* (una especie de huella digital irreversible). | Nunca se guarda una contraseña en texto plano. Si alguien roba la base de datos, no puede leer las contraseñas reales, solo sus hashes (que además llevan un "salt" aleatorio, así dos contraseñas iguales no dan el mismo hash). |
 | **Socket.io** | Una librería para comunicación en **tiempo real** entre navegador y servidor, usando WebSockets. | El chat necesita que los mensajes lleguen *al instante*, sin que el navegador tenga que estar preguntando "¿hay algo nuevo?" cada dos segundos (eso se llama *polling* y es ineficiente). Con WebSockets, la conexión queda abierta y el servidor le puede "avisar" al navegador apenas pasa algo. |
 | **Multer** | Middleware de Express para recibir archivos subidos desde un formulario (`multipart/form-data`). | Sin esto, Express no sabe interpretar un formulario que incluye una foto — solo entiende JSON o texto plano por defecto. |
 | **Sharp** | Una librería para procesar imágenes (redimensionar, comprimir, convertir formato). | Cada foto subida se convierte en 3 tamaños (miniatura, mediana, original comprimido) para que la página cargue rápido incluso con muchas publicaciones. Ver [sección 8.2](#82-el-pipeline-de-imágenes-sharp). |
-| **Resend** | Un servicio externo para mandar emails transaccionales (códigos de verificación, recuperación de contraseña). | Los proveedores de email (Gmail, Outlook) rechazan o marcan como spam los emails que salen directo desde un servidor cualquiera, porque no tiene "reputación". Resend es un intermediario especializado en que esos emails realmente lleguen. |
 | **Helmet** | Middleware que agrega automáticamente una serie de cabeceras HTTP de seguridad. | Protege contra ataques conocidos (XSS, *clickjacking*, sniffing de tipo MIME) sin tener que configurar cada cabecera a mano. |
 | **CORS** (`cors`) | Un mecanismo del navegador que por defecto **bloquea** que una página web de un origen (ej. `localhost:5173`) le pida datos a un servidor de otro origen (ej. `localhost:4000`), a menos que el servidor lo autorice explícitamente. | Configuramos el backend para autorizar explícitamente el origen del frontend, y nada más. |
-| **express-rate-limit** | Middleware que cuenta cuántas peticiones manda una misma IP en un lapso de tiempo, y corta si se pasa. | Evita que alguien intente miles de contraseñas por segundo (*fuerza bruta*) contra el login, o que pida miles de códigos de verificación para saturar el servicio de email. |
+| **express-rate-limit** | Middleware que cuenta cuántas peticiones manda una misma IP en un lapso de tiempo, y corta si se pasa. | Evita que alguien intente miles de contraseñas por segundo (*fuerza bruta*) contra el login. |
 | **express-validator** | Librería para validar y limpiar los datos que llegan en el `body` de una petición (¿es un email válido? ¿la contraseña tiene 8 caracteres?). | La validación del lado del servidor es la que realmente importa (la del frontend es solo para que el usuario no tenga que esperar un viaje al servidor para saber que se equivocó). |
 | **PM2** | Un *gestor de procesos* para aplicaciones Node en producción. | Sin PM2, si el proceso de Node se cae (por un error, o porque cerraste la terminal), la web deja de funcionar hasta que alguien lo vuelva a arrancar a mano. PM2 lo mantiene corriendo como un servicio, y lo reinicia solo si se cae. Ver [ecosystem.config.js](backend/ecosystem.config.js). |
 
@@ -177,7 +174,6 @@ erDiagram
     USERS ||--o{ PETS : "publica"
     USERS ||--o{ FAVORITES : "marca"
     USERS ||--o{ REFRESH_TOKENS : "tiene sesiones"
-    USERS ||--o{ VERIFICATION_CODES : "recibe códigos"
     USERS ||--o{ NOTIFICATIONS : "recibe"
     USERS ||--o{ ADMIN_ACTIONS : "admin ejecuta"
     USERS }o--|| CITIES : "vive en"
@@ -201,7 +197,6 @@ erDiagram
         int city_id FK
         enum role
         enum status
-        boolean is_verified
         datetime created_at
     }
     CITIES {
@@ -273,13 +268,6 @@ erDiagram
         string token_hash
         datetime expires_at
     }
-    VERIFICATION_CODES {
-        int id PK
-        int user_id FK
-        string code_hash
-        enum type
-        datetime expires_at
-    }
     ADMIN_ACTIONS {
         int id PK
         int admin_id FK
@@ -303,7 +291,6 @@ erDiagram
 | **messages** | Los mensajes de cada conversación. | `read_at` es nulo hasta que el destinatario abre el chat — así se puede calcular cuántos mensajes están "sin leer". |
 | **notifications** | Los eventos que le interesan a un usuario (te escribieron, tu mascota favorita fue adoptada, etc.). | El campo `payload` es de tipo `JSON` — guarda datos que varían según el tipo de notificación (a veces un `petId`, a veces un `conversationId`) sin tener que crear una tabla con 10 columnas casi siempre vacías. |
 | **refresh_tokens** | Sesiones activas (para el "Recordarme"). | Nunca se guarda el token real, solo su hash — igual que las contraseñas. Se explica en la [sección 7](#7-autenticación-cómo-sabe-el-sistema-quién-sos). |
-| **verification_codes** | Códigos de 6 dígitos para verificar el email o recuperar la contraseña. | Tiene un campo `attempts` para limitar cuántas veces se puede probar un código mal antes de invalidarlo (protección contra fuerza bruta sobre un código de solo 6 dígitos). |
 | **admin_actions** | Auditoría: qué hizo cada administrador. | Queda un registro permanente de cada suspensión/eliminación, con quién la hizo y cuándo — importante para poder explicar o revertir una decisión de moderación. |
 
 ### 5.3 Las migraciones: versionar la base de datos
@@ -467,13 +454,8 @@ sequenceDiagram
     U->>FE: Completa formulario de registro
     FE->>BE: POST /auth/register
     BE->>BE: Hashea la contraseña con bcrypt
-    BE->>BE: Guarda usuario (is_verified=false)
-    BE->>BE: Genera código de 6 dígitos, lo hashea y guarda
-    BE-->>U: Email con el código (vía Resend)
-    U->>FE: Ingresa el código
-    FE->>BE: POST /auth/verify-email
-    BE->>BE: Compara hash del código
-    BE->>BE: is_verified = true
+    BE->>BE: Guarda usuario (activo de entrada, sin verificación por email)
+    BE-->>FE: Cuenta creada
     U->>FE: Login (email + password)
     FE->>BE: POST /auth/login
     BE->>BE: bcrypt.compare(password, hash)
@@ -981,11 +963,10 @@ Esto es un patrón que se llama ***promise memoization***: mientras ya hay un re
 | **Cookies `httpOnly` + `secure` (en producción) + `sameSite`** | Que JavaScript malicioso (XSS) pueda leer el token de sesión, y ataques de *CSRF*. |
 | **Helmet** | Varias cabeceras de seguridad HTTP a la vez (evita *clickjacking*, *sniffing* de MIME type, fuerza HTTPS, etc.). |
 | **CORS restringido al origen del frontend** | Que cualquier otra página web pueda hacerle peticiones a la API en nombre de un usuario logueado. |
-| **Rate limiting en login y códigos** | Ataques de fuerza bruta (probar miles de contraseñas o códigos por segundo). |
+| **Rate limiting en login** | Ataques de fuerza bruta (probar miles de contraseñas por segundo). |
 | **Chequeo de baneo en cada request (no solo al loguear)** | Que un usuario suspendido siga usando la app con un token todavía válido — se revisa el estado real en la base en cada petición autenticada. |
 | **`Cross-Origin-Resource-Policy` ajustada solo para `/uploads`** | Se relaja *a propósito y de forma acotada* (no global) para que las imágenes puedan cargarse desde el origen del frontend, sin bajar la guardia en el resto de la API. |
-| **Verificación de email** | Evita cuentas falsas creadas con emails que no existen (actualmente desactivada temporalmente para pruebas, ver `SKIP_EMAIL_VERIFICATION` en `.env`). |
-| **Variables sensibles en `.env`, nunca en el código ni en Git** | Que las claves (JWT, base de datos, Resend) queden expuestas si el código se sube a un repositorio. |
+| **Variables sensibles en `.env`, nunca en el código ni en Git** | Que las claves (JWT, base de datos) queden expuestas si el código se sube a un repositorio. |
 | **Auditoría de acciones de administrador** | Trazabilidad: queda registro de quién baneó/eliminó qué y cuándo. |
 
 ---

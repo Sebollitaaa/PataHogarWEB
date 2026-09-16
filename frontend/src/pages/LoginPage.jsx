@@ -34,8 +34,7 @@ export default function LoginPage() {
         <h1>Ingresá a tu cuenta</h1>
         <p className="auth-card__subtitle">Encontrá o publicá mascotas en adopción.</p>
 
-        {location.state?.verified && <div className="alert alert-success" style={{ marginBottom: 16 }}>Cuenta verificada, ya podés ingresar.</div>}
-        {location.state?.passwordReset && <div className="alert alert-success" style={{ marginBottom: 16 }}>Contraseña actualizada, ingresá con la nueva.</div>}
+        {location.state?.registered && <div className="alert alert-success" style={{ marginBottom: 16 }}>Cuenta creada, ya podés ingresar.</div>}
         {error && <div className="alert alert-error" style={{ marginBottom: 16 }}>{error}</div>}
 
         <form onSubmit={handleSubmit}>
@@ -60,9 +59,6 @@ export default function LoginPage() {
               />
               Recordarme
             </label>
-            <Link to="/olvide-password" style={{ fontSize: '0.85rem', color: 'var(--color-primary)', fontWeight: 600 }}>
-              ¿Olvidaste tu contraseña?
-            </Link>
           </div>
 
           <button className="btn btn-primary btn-block" disabled={loading}>

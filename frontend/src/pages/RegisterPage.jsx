@@ -47,7 +47,7 @@ export default function RegisterPage() {
 
     setLoading(true);
     try {
-      const data = await authApi.register({
+      await authApi.register({
         firstName: form.firstName,
         lastName: form.lastName,
         email: form.email,
@@ -62,11 +62,7 @@ export default function RegisterPage() {
         verifiedLng: location?.lng,
       });
 
-      if (data.requiresVerification === false) {
-        navigate('/ingresar', { state: { verified: true } });
-      } else {
-        navigate(`/verificar-email?email=${encodeURIComponent(form.email)}`);
-      }
+      navigate('/ingresar', { state: { registered: true } });
     } catch (err) {
       setError(err.message);
     } finally {

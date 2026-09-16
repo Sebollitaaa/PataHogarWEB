@@ -2,7 +2,7 @@ const db = require('../db/knex');
 
 const PUBLIC_COLUMNS = [
   'id', 'first_name', 'last_name', 'email', 'phone', 'profile_photo_url',
-  'city_id', 'role', 'status', 'is_verified', 'created_at',
+  'city_id', 'role', 'status', 'created_at',
 ];
 
 function findByEmail(email) {

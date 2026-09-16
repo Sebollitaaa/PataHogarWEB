@@ -18,10 +18,6 @@ exports.up = function (knex) {
     table.enu('role', ['user', 'admin']).notNullable().defaultTo('user');
     table.enu('status', ['active', 'banned']).notNullable().defaultTo('active');
 
-    // Preparado para sumar verificación por SMS a futuro sin migrar de nuevo.
-    table.enu('verification_method', ['email', 'sms']).notNullable().defaultTo('email');
-    table.boolean('is_verified').notNullable().defaultTo(false);
-
     table.timestamp('last_login_at').nullable();
     table.timestamps(true, true);
 

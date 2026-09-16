@@ -19,13 +19,4 @@ const loginLimiter = rateLimit({
   message: { error: { message: 'Demasiados intentos de inicio de sesión. Esperá unos minutos.' } },
 });
 
-// Límite estricto para pedidos de códigos (verificación de email / recuperación de contraseña).
-const codeRequestLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 5,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: { message: 'Ya pediste varios códigos. Esperá unos minutos antes de volver a intentar.' } },
-});
-
-module.exports = { generalLimiter, loginLimiter, codeRequestLimiter };
+module.exports = { generalLimiter, loginLimiter };

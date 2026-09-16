@@ -32,13 +32,7 @@ JWT_ACCESS_EXPIRES_IN=15m
 JWT_REFRESH_EXPIRES_IN_DAYS_REMEMBER=30
 JWT_REFRESH_EXPIRES_IN_DAYS_SESSION=1
 
-RESEND_API_KEY=<tu API key de Resend>
-EMAIL_FROM="PataHogar <onboarding@resend.dev>"
-
-VERIFICATION_CODE_EXPIRES_MIN=15
 LOCATION_MISMATCH_BLOCK_KM=100
-ALLOW_ONLY_GMAIL_REGISTRATION=false
-SKIP_EMAIL_VERIFICATION=false
 
 CLIENT_URL=https://<tu-dominio-de-railway>.up.railway.app
 ```
@@ -50,9 +44,9 @@ CLIENT_URL=https://<tu-dominio-de-railway>.up.railway.app
 node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 ```
 
-**`SKIP_EMAIL_VERIFICATION=false`**: lo dejo en `false` a propósito acá porque esto ya es la web "de verdad" — si lo dejás en `true` cualquiera se registra sin confirmar el email. Para que esto funcione necesitás tu `RESEND_API_KEY` real cargada.
-
 **`CLIENT_URL`**: no vas a saber el dominio hasta el primer deploy. Dejalo con cualquier valor por ahora, hacé el primer deploy, copiá la URL que te da Railway (paso 5), volvé acá y actualizala.
+
+> No hay verificación por email: las cuentas quedan activas apenas se registran, para poder probar con las cuentas que quieras.
 
 ## 4. Agregar un volumen para las fotos
 

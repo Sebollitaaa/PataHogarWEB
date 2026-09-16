@@ -11,8 +11,6 @@ module.exports = {
       restart_delay: 2000,
       watch: false,
       max_memory_restart: '400M',
-      // NODE_ENV queda en development mientras probamos localmente sin Resend configurado.
-      // Cambiar a 'production' cuando se despliegue de verdad con RESEND_API_KEY en el .env del servidor.
       env: {
         NODE_ENV: 'development',
       },
